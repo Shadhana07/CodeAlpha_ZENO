@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZENO - Product Details</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header>
+        <div class="logo">
+            <span class="bag"></span>
+            <span class="purple-z">Z</span><span class="white-eno">ENO</span>
+        </div>
+
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="index.html#products">Shop</a>
+            <a href="index.html#about">About</a>
+            <a href="index.html#contact">Contact</a>
+        </nav>
+
+        <div class="header-icons">
+            <span>⌕</span>
+            <span>♡</span>
+            <span class="cart-icon" onclick="showCart()">🛒<b>0</b></span>
+        </div>
+    </header>
+
+
+    <!-- SHOPPING CART SECTION -->
+    <section id="cart-section" class="cart-panel">
+
+        <button onclick="closeCart()" class="close-cart">✕</button>
+
+        <h2>Your Shopping Cart</h2>
+
+        <div id="cart-items"></div>
+
+        <h3>Total: ₹<span id="cart-total">0</span></h3>
+
+        <button class="checkout-btn" onclick="checkout()">
+            Proceed to Checkout
+        </button>
+
+    </section>
+
+
+    <!-- PRODUCT DETAILS SECTION -->
+    <section class="product-details-section">
+
+        <div class="product-details-box">
+
+            <div class="product-details-layout">
+
+                <div class="product-details-image">
+                    <img
+                        id="product-image"
+                        src="images/zeno-tshirt.png"
+                        alt="ZENO Product"
+                        style="width: 200px; max-width: 100%;"
+                    >
+                </div>
+
+                <div class="product-details-info">
+
+                    <h1 id="product-name">Stylish T-Shirt</h1>
+
+                    <h2 id="product-price">₹499</h2>
+
+                    <p id="product-description">
+                        Discover everyday comfort with the ZENO Stylish
+                        T-Shirt. Designed for casual wear and everyday style.
+                    </p>
+
+                    <button id="add-product-cart">
+                        🛒 Add to Cart
+                    </button>
+
+                    <p>
+                        <a href="index.html">← Back to Shopping</a>
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- JAVASCRIPT -->
+    <script src="script.js"></script>
+
+    <script>
+
+        // PRODUCT INFORMATION
+        const products = {
+
+            tshirt: {
+                name: "Stylish T-Shirt",
+                price: 499,
+                image: "images/zeno-tshirt.png",
+                description: "Discover everyday comfort with the ZENO Stylish T-Shirt. Designed for casual wear and everyday style."
+            },
+
+            watch: {
+                name: "Classic Watch",
+                price: 999,
+                image: "images/zeno-watch.png",
+                description: "Complete your look with the ZENO Classic Watch. A stylish accessory designed for everyday use."
+            },
+
+            shoes: {
+                name: "Casual Shoes",
+                price: 1499,
+                image: "images/zeno-shoes.png",
+                description: "Step into comfort with ZENO Casual Shoes. Designed for everyday wear with a clean and modern style."
+            }
+
+        };
+
+
+        // GET SELECTED PRODUCT FROM URL
+        const urlParams = new URLSearchParams(window.location.search);
+
+        const selectedProduct = urlParams.get("product") || "tshirt";
+
+        const product = products[selectedProduct] || products.tshirt;
+
+
+        // DISPLAY SELECTED PRODUCT
+        document.getElementById("product-name").textContent = product.name;
+
+        document.getElementById("product-price").textContent = "₹" + product.price;
+
+        document.getElementById("product-image").src = product.image;
+
+        document.getElementById("product-image").alt = product.name;
+
+        document.getElementById("product-description").textContent = product.description;
+
+        document.title = "ZENO - " + product.name;
+
+
+        // ADD SELECTED PRODUCT TO CART
+        document.getElementById("add-product-cart").onclick = function() {
+
+            addToCart(product.name, product.price);
+
+        };
+
+    </script>
+
+</body>
+</html>

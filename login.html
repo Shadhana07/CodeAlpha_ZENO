@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZENO - Login</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <section class="register-section">
+        <div class="register-box">
+
+            <h1>Welcome Back to ZENO</h1>
+
+            <form id="login-form">
+                <input type="email" id="email" placeholder="Email Address" required>
+
+                <input type="password" id="password" placeholder="Password" required>
+
+                <button type="submit">Login</button>
+            </form>
+
+            <p>Don't have an account? <a href="register.html">Create Account</a></p>
+
+        </div>
+    </section>
+
+    <script>
+    document.getElementById("login-form").addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+
+        try {
+            const response = await fetch("/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ email, password })
+            });
+
+            const result = await response.json();
+
+            alert(result.message);
+
+            if (response.ok) {
+                window.location.href = "index.html";
+            }
+        } catch (error) {
+            alert("Unable to connect to the server. Please try again.");
+        }
+    });
+    </script>
+
+</body>
+</html>
