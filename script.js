@@ -2,7 +2,31 @@
 let cart = [];
 
 try {
-    cart = JSON.parse(localStorage.getItem("zenoCart")) || [];
+    const savedCart = JSON.parse(localStorage.getItem("zenoCart")) || [];
+
+    // FIX OLD CART ITEMS AND MERGE DUPLICATES
+    savedCart.forEach(item => {
+        if (!item || !item.name || !item.price) {
+            return;
+        }
+
+        const quantity = Number(item.quantity) || 1;
+
+        const existingItem = cart.find(
+            cartItem => cartItem.name === item.name
+        );
+
+        if (existingItem) {
+            existingItem.quantity += quantity;
+        } else {
+            cart.push({
+                name: item.name,
+                price: Number(item.price),
+                quantity: quantity
+            });
+        }
+    });
+
 } catch (error) {
     cart = [];
 }
@@ -19,21 +43,30 @@ function updateCartBadge() {
     const badge = document.querySelector(".cart-icon b");
 
     if (badge) {
-        badge.textContent = cart.length;
+        const totalItems = cart.reduce(
+            (sum, item) => sum + item.quantity, 0
+        );
+
+        badge.textContent = totalItems;
     }
 }
 
 
 // ADD PRODUCT TO CART
 function addToCart(name, price) {
+    const existingItem = cart.find(item => item.name === name);
 
-    cart.push({
-        name: name,
-        price: price
-    });
+    if (existingItem) {
+        existingItem.quantity += 1;
+    } else {
+        cart.push({
+            name: name,
+            price: Number(price),
+            quantity: 1
+        });
+    }
 
     saveCart();
-
     updateCartBadge();
 
     alert(name + " added to cart!");
@@ -59,11 +92,16 @@ function showCart() {
 
     cart.forEach(function(item) {
 
+        const itemTotal = item.price * item.quantity;
+
         cartItems.innerHTML += `
-            <p>${item.name} - ₹${item.price}</p>
+            <p>
+                ${item.name} - ₹${item.price} × ${item.quantity}
+                = ₹${itemTotal}
+            </p>
         `;
 
-        total += item.price;
+        total += itemTotal;
 
     });
 

@@ -21,6 +21,7 @@ app.use(session({
     }
 }));
 
+// USERS TABLE
 db.exec(`
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -29,6 +30,25 @@ db.exec(`
         password TEXT NOT NULL
     )
 `);
+
+// PRODUCTS TABLE
+db.exec(`
+    CREATE TABLE IF NOT EXISTS products (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL UNIQUE,
+        price REAL NOT NULL
+    )
+`);
+
+// INSERT INITIAL PRODUCTS
+const insertProduct = db.prepare(`
+    INSERT OR IGNORE INTO products (name, price)
+    VALUES (?, ?)
+`);
+
+insertProduct.run("Stylish T-Shirt", 499);
+insertProduct.run("Classic Watch", 999);
+insertProduct.run("Casual Shoes", 1499);
 
 // ORDERS TABLE
 db.exec(`
@@ -65,7 +85,11 @@ app.post("/register", (req, res) => {
             "INSERT INTO users (name, email, password) VALUES (?, ?, ?)"
         );
 
-        insertUser.run(name.trim(), email.trim().toLowerCase(), hashedPassword);
+        insertUser.run(
+            name.trim(),
+            email.trim().toLowerCase(),
+            hashedPassword
+        );
 
         res.status(201).json({
             message: "Account created successfully!"
@@ -128,33 +152,48 @@ app.post("/orders", (req, res) => {
         });
     }
 
-    const prices = {
-        "Stylish T-Shirt": 499,
-        "Classic Watch": 999,
-        "Casual Shoes": 1499
-    };
+    // GET PRODUCTS FROM DATABASE
+    const products = db.prepare(
+        "SELECT name, price FROM products"
+    ).all();
 
+    const prices = {};
+
+    products.forEach(product => {
+        prices[product.name] = product.price;
+    });
+
+    // VALIDATE PRODUCTS AND QUANTITIES
     const validItems = items.map(item => {
         if (!item || !prices[item.name]) {
             return null;
         }
 
+        const quantity = Number(item.quantity) || 1;
+
+        if (!Number.isInteger(quantity) || quantity < 1 || quantity > 99) {
+            return null;
+        }
+
         return {
             name: item.name,
-            price: prices[item.name]
+            price: prices[item.name],
+            quantity: quantity
         };
     });
 
     if (validItems.includes(null)) {
         return res.status(400).json({
-            message: "Invalid product in your cart."
+            message: "Invalid product or quantity in your cart."
         });
     }
 
+    // CALCULATE TOTAL
     const total = validItems.reduce(
-        (sum, item) => sum + item.price, 0
+        (sum, item) => sum + (item.price * item.quantity), 0
     );
 
+    // SAVE ORDER
     const saveOrder = db.prepare(
         "INSERT INTO orders (user_id, items, total) VALUES (?, ?, ?)"
     );
@@ -171,7 +210,7 @@ app.post("/orders", (req, res) => {
     });
 });
 
-// VIEW MY ORDERS (TESTING)
+// VIEW MY ORDERS
 app.get("/my-orders", (req, res) => {
     if (!req.session.userId) {
         return res.status(401).json({
@@ -186,10 +225,12 @@ app.get("/my-orders", (req, res) => {
     res.json(orders);
 });
 
+// HOME ROUTE
 app.get("/", (req, res) => {
     res.send("ZENO server is running!");
 });
 
+// START SERVER
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
