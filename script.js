@@ -190,3 +190,4 @@ async function checkout() {
 
 // UPDATE BADGE WHEN PAGE LOADS
 updateCartBadge();
+

@@ -135,6 +135,23 @@ app.post("/login", (req, res) => {
         name: user.name
     });
 });
+// USER LOGOUT
+app.post("/logout", (req, res) => {
+    req.session.destroy((error) => {
+        if (error) {
+            return res.status(500).json({
+                message: "Logout failed."
+            });
+        }
+
+        res.clearCookie("connect.sid");
+
+        res.json({
+            message: "Logged out successfully!"
+        });
+    });
+});
+
 
 // PLACE CUSTOMER ORDER
 app.post("/orders", (req, res) => {
